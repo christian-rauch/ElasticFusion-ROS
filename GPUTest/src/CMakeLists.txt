@@ -5,14 +5,13 @@ project(GPUTest)
 find_package(Pangolin 0.1 REQUIRED)
 find_package(CUDA REQUIRED)
 
-set(efusion_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../Core/src" CACHE PATH "Where ElasticFusion.h lives")
-set(efusion_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/../../Core/build/libefusion.so" CACHE FILEPATH "Where libefusion.so lives")
+find_package(libefusion REQUIRED)
 
 include_directories(/usr/include/suitesparse)
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${EIGEN_INCLUDE_DIRS})
 include_directories(${Pangolin_INCLUDE_DIRS})
-include_directories(${efusion_INCLUDE_DIR})
+include_directories(${libefusion_INCLUDE_DIR})
 
 file(GLOB srcs *.cpp)
 
@@ -24,7 +23,7 @@ add_executable(GPUTest
 )
 
 target_link_libraries(GPUTest
-                      ${efusion_LIBRARY}
+                      ${libefusion_LIBRARY}
                       ${Eigen_LIBRARIES}
                       ${Pangolin_LIBRARIES}
                       ${CUDA_LIBRARIES}
