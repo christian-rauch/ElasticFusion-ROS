@@ -18,6 +18,9 @@
  
 #include "MainController.h"
 
+#include "Tools/RosBagReader.hpp"
+#include "Tools/RosNodeReader.hpp"
+
 MainController::MainController(int argc, char * argv[])
  : good(true),
    eFusion(0),

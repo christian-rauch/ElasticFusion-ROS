@@ -28,6 +28,14 @@ find_package(efusion REQUIRED)
 find_package(SuiteSparse REQUIRED)
 find_package(JPEG REQUIRED)
 
+find_package(rosbag REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(roscpp REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(image_geometry REQUIRED)
+
 if(WIN32)
   find_package(RealSense QUIET)
   CANONIFY_BOOL(REALSENSE_FOUND)
@@ -93,6 +101,38 @@ target_link_libraries(ElasticFusion
                       ${LAPACK_LIBRARIES}
                       JPEG::JPEG
 )
+
+target_include_directories(ElasticFusion PUBLIC
+    ${rosbag_INCLUDE_DIRS}
+    ${tf2_INCLUDE_DIRS}
+)
+target_link_libraries(ElasticFusion
+    ${rosbag_LIBRARIES}
+    ${tf2_LIBRARIES}
+)
+add_definitions(-DROSBAG)
+
+target_include_directories(ElasticFusion PUBLIC
+    ${roscpp_INCLUDE_DIRS}
+    ${image_transport_INCLUDE_DIRS}
+    ${tf2_ros_INCLUDE_DIRS}
+)
+target_link_libraries(ElasticFusion
+    ${roscpp_LIBRARIES}
+    ${image_transport_LIBRARIES}
+    ${tf2_ros_LIBRARIES}
+)
+add_definitions(-DROSNODE)
+
+target_include_directories(ElasticFusion PUBLIC
+    ${cv_bridge_INCLUDE_DIRS}
+    ${image_geometry_INCLUDE_DIRS}
+)
+target_link_libraries(ElasticFusion
+    ${cv_bridge_LIBRARIES}
+    ${image_geometry_LIBRARIES}
+)
+add_definitions(-DROSCOMMON)
 
 set_property(TARGET ElasticFusion PROPERTY CXX_STANDARD 17)
 
