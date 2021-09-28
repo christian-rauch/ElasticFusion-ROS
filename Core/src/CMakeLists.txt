@@ -8,6 +8,8 @@ find_package(Pangolin 0.1 REQUIRED)
 find_package(CUDA REQUIRED)
 find_package(SuiteSparse REQUIRED)
 
+include(GNUInstallDirs)
+
 set(efusion_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Shaders" CACHE PATH "Where the shaders live")
 
 include_directories(${Pangolin_INCLUDE_DIRS})
@@ -76,11 +78,52 @@ target_link_libraries(efusion
 					  ${EXTRA_WINDOWS_LIBS}
 )
 
+target_include_directories(efusion PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>"
+    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>/${PROJECT_NAME};${Pangolin_INCLUDE_DIRS}")
+
 INSTALL(TARGETS efusion EXPORT efusion
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib
             ARCHIVE DESTINATION lib
 )
+
+set(PUBLIC_HEADERS
+  "Ferns.h"
+  "GPUTexture.h"
+  "PoseMatch.h"
+  "Utils/CholeskyDecomp.h"
+  "Utils/OrderedJacobianRow.h"
+  "Utils/Stopwatch.h"
+  "Utils/GPUConfig.h"
+  "Utils/Jacobian.h"
+  "Utils/GraphNode.h"
+  "Utils/Img.h"
+  "Utils/DeformationGraph.h"
+  "Utils/RGBDOdometry.h"
+  "Utils/Resolution.h"
+  "Utils/WindowsExtras.h"
+  "Utils/Parse.h"
+  "Utils/OdometryProvider.h"
+  "Utils/Intrinsics.h"
+  "Deformation.h"
+  "ElasticFusion.h"
+  "Defines.h"
+  "GlobalModel.h"
+  "IndexMap.h"
+  "Shaders/FillIn.h"
+  "Shaders/Vertex.h"
+  "Shaders/Uniform.h"
+  "Shaders/ComputePack.h"
+  "Shaders/Resize.h"
+  "Shaders/FeedbackBuffer.h"
+  "Shaders/Shaders.h"
+)
+
+foreach(HEADER ${PUBLIC_HEADERS})
+    string(REGEX MATCH "(.*)[/\\]" DIR ${HEADER})
+    install(FILES ${HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/${DIR})
+endforeach()
 
 INSTALL(EXPORT efusion
     DESTINATION share/${PROJECT_NAME}/cmake
