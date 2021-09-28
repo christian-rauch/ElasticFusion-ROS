@@ -76,8 +76,13 @@ target_link_libraries(efusion
 					  ${EXTRA_WINDOWS_LIBS}
 )
 
-INSTALL(TARGETS efusion
+INSTALL(TARGETS efusion EXPORT efusion
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib
             ARCHIVE DESTINATION lib
+)
+
+INSTALL(EXPORT efusion
+    DESTINATION share/${PROJECT_NAME}/cmake
+    FILE ${PROJECT_NAME}Config.cmake
 )
