@@ -1,5 +1,3 @@
-#ifdef ROSNODE
-
 #include "RosNodeReader.hpp"
 #include <sensor_msgs/CameraInfo.h>
 #include <cv_bridge/cv_bridge.h>
@@ -24,6 +22,9 @@ RosNodeReader::RosNodeReader(const uint32_t synchroniser_queue_size,
   sync->connectInput(sub_colour, sub_depth);
   sync->registerCallback(&RosNodeReader::on_rgbd, this);
 
+  decompressionBufferImage = new Bytef[Resolution::getInstance().numPixels() * 3];
+  decompressionBufferDepth = new Bytef[Resolution::getInstance().numPixels() * 2];
+
   // wait for single CameraInfo message to get intrinsics
   std::cout << "waiting for 'sensor_msgs/CameraInfo' message on '" + ros::names::resolve("camera_info") + "'" << std::endl;
   sensor_msgs::CameraInfo::ConstPtr ci = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("camera_info", *n);
@@ -47,17 +48,17 @@ RosNodeReader::~RosNodeReader() {
 void RosNodeReader::on_rgbd(const sensor_msgs::Image::ConstPtr& msg_colour, const sensor_msgs::Image::ConstPtr& msg_depth) {
   mutex.lock();
   const std_msgs::Header hdr_colour = msg_colour->header;
-  data.timestamp = int64_t(hdr_colour.stamp.toNSec());
-  data.rgb = cv_bridge::toCvCopy(msg_colour, "rgb8")->image;
+//  data.timestamp = int64_t(hdr_colour.stamp.toNSec());
+  rgbd.first = cv_bridge::toCvCopy(msg_colour, "rgb8")->image;
 
-  data.depth = cv_bridge::toCvCopy(msg_depth)->image;
-  if (!data.depth.empty() && data.depth.type() == CV_16U) {
+  rgbd.second = cv_bridge::toCvCopy(msg_depth)->image;
+  if (!rgbd.second.empty() && rgbd.second.type() == CV_16U) {
     // convert from 16 bit integer millimeter to 32 bit float meter
-    data.depth.convertTo(data.depth, CV_32F, 1e-3);
+    rgbd.second.convertTo(rgbd.second, CV_32F, 1e-3);
   }
 
   // scale and crop images in place
-  image_crop_target.map_target(data);
+  image_crop_target.map_target(rgbd);
   mutex.unlock();
 
   // use provided ground truth camera frame or colour optical frame from images
@@ -70,6 +71,8 @@ void RosNodeReader::on_rgbd(const sensor_msgs::Image::ConstPtr& msg_colour, cons
     while (tf_buffer._getParent(parent, {}, parent));
     frame_gt_root = parent;
   }
+
+  // TODO: set the raw buffers: decompressionBufferImage, decompressionBufferDepth
 }
 
 void RosNodeReader::getNext() {}
@@ -82,11 +85,15 @@ bool RosNodeReader::hasMore() {
   return sub_colour.getNumPublishers()>0 && sub_depth.getNumPublishers()>0;
 }
 
-bool RosNodeReader::rewind() {
-  return false;
+bool RosNodeReader::rewound() {
+    return false;
 }
 
-void RosNodeReader::getPrevious() {}
+void RosNodeReader::rewind() {
+  //
+}
+
+void RosNodeReader::getBack() {}
 
 void RosNodeReader::fastForward(int /*frame*/) {}
 
@@ -98,30 +105,28 @@ void RosNodeReader::setAuto(bool /*value*/) {
   // TODO: implement dynamic reconfigure of ROS driver
 }
 
-FrameData RosNodeReader::getFrameData() {
-  const std::lock_guard<std::mutex> lock(mutex);
-  return data;
-}
+//FrameData RosNodeReader::getFrameData() {
+//  const std::lock_guard<std::mutex> lock(mutex);
+//  return data;
+//}
 
-Eigen::Matrix4f RosNodeReader::getIncrementalTransformation(uint64_t timestamp) {
-  // camera pose at requested time with respect to root frame
-  ros::Time time;
-  time.fromNSec(timestamp);
-  Eigen::Isometry3d pose;
-  try {
-    pose = tf2::transformToEigen(tf_buffer.lookupTransform(frame_gt_root, frame_gt_camera, time));
-  } catch (tf2::ExtrapolationException &) {
-    // there is no transformation available
-    return {};
-  }
+//Eigen::Matrix4f RosNodeReader::getIncrementalTransformation(uint64_t timestamp) {
+//  // camera pose at requested time with respect to root frame
+//  ros::Time time;
+//  time.fromNSec(timestamp);
+//  Eigen::Isometry3d pose;
+//  try {
+//    pose = tf2::transformToEigen(tf_buffer.lookupTransform(frame_gt_root, frame_gt_camera, time));
+//  } catch (tf2::ExtrapolationException &) {
+//    // there is no transformation available
+//    return {};
+//  }
 
-  // store the first requested pose as reference
-  if (!ref_pose.matrix().any()) {
-    ref_pose = pose;
-  }
+//  // store the first requested pose as reference
+//  if (!ref_pose.matrix().any()) {
+//    ref_pose = pose;
+//  }
 
-  // provide the camera poses with respect to the reference pose
-  return (ref_pose.inverse() * pose).matrix().cast<float>();
-}
-
-#endif
+//  // provide the camera poses with respect to the reference pose
+//  return (ref_pose.inverse() * pose).matrix().cast<float>();
+//}

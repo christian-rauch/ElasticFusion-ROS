@@ -1,5 +1,3 @@
-#ifdef ROSNODE
-
 #pragma once
 #include "LogReader.h"
 #include <rosbag/bag.h>
@@ -9,12 +7,12 @@
 #include <image_transport/subscriber_filter.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include "ros_common.hpp"
-#include <Utils/GroundTruthOdometryInterface.hpp>
+//#include <Utils/GroundTruthOdometryInterface.hpp>
 #include <Eigen/Geometry>
 #include <tf2_ros/transform_listener.h>
 
 
-class RosNodeReader : public LogReader, public GroundTruthOdometryInterface {
+class RosNodeReader : public LogReader/*, public GroundTruthOdometryInterface*/ {
 public:
   RosNodeReader(const uint32_t synchroniser_queue_size,
                 const bool flipColors = false, const cv::Size &target_dimensions = {},
@@ -30,9 +28,11 @@ public:
 
   bool hasMore() override;
 
-  bool rewind() override;
+  bool rewound() override;
 
-  void getPrevious() override;
+  void rewind() override;
+
+  void getBack() override;
 
   void fastForward(int frame) override;
 
@@ -40,9 +40,9 @@ public:
 
   void setAuto(bool value) override;
 
-  FrameData getFrameData() override;
+//  FrameData getFrameData() override;
 
-  Eigen::Matrix4f getIncrementalTransformation(uint64_t timestamp) override;
+//  Eigen::Matrix4f getIncrementalTransformation(uint64_t timestamp) override;
 
 private:
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> ApproximateTimePolicy;
@@ -68,7 +68,7 @@ private:
   ImageCropTarget image_crop_target;
 
   std::mutex mutex;
-  FrameData data;
+//  FrameData data;
+  // colour-depth-pair
+  std::pair<cv::Mat, cv::Mat> rgbd;
 };
-
-#endif

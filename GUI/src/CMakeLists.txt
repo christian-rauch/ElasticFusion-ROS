@@ -102,6 +102,8 @@ target_link_libraries(ElasticFusion
                       JPEG::JPEG
 )
 
+set_property(TARGET ElasticFusion PROPERTY CXX_STANDARD 17)
+
 target_include_directories(ElasticFusion PUBLIC
     ${rosbag_INCLUDE_DIRS}
     ${tf2_INCLUDE_DIRS}
@@ -110,7 +112,7 @@ target_link_libraries(ElasticFusion
     ${rosbag_LIBRARIES}
     ${tf2_LIBRARIES}
 )
-add_definitions(-DROSBAG)
+#add_definitions(-DROSBAG)
 
 target_include_directories(ElasticFusion PUBLIC
     ${roscpp_INCLUDE_DIRS}
@@ -122,7 +124,7 @@ target_link_libraries(ElasticFusion
     ${image_transport_LIBRARIES}
     ${tf2_ros_LIBRARIES}
 )
-add_definitions(-DROSNODE)
+#add_definitions(-DROSNODE)
 
 target_include_directories(ElasticFusion PUBLIC
     ${cv_bridge_INCLUDE_DIRS}
@@ -132,7 +134,7 @@ target_link_libraries(ElasticFusion
     ${cv_bridge_LIBRARIES}
     ${image_geometry_LIBRARIES}
 )
-add_definitions(-DROSCOMMON)
+#add_definitions(-DROSCOMMON)
 
 set_property(TARGET ElasticFusion PROPERTY CXX_STANDARD 17)
 

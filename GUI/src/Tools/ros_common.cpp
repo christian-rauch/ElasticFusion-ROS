@@ -101,21 +101,23 @@ ImageCropTarget::ImageCropTarget(const sensor_msgs::CameraInfo::ConstPtr &camera
   }
 
   // set global camera intrinsics
-  Resolution::setResolution(width, height);
-  Intrinsics::setIntrinics(tgt_f.x(), tgt_f.y(), tgt_c.x(), tgt_c.y());
+//  Resolution::setResolution(width, height);
+  Resolution::getInstance(width, height);
+//  Intrinsics::setIntrinics(tgt_f.x(), tgt_f.y(), tgt_c.x(), tgt_c.y());
+  Intrinsics::getInstance(tgt_f.x(), tgt_f.y(), tgt_c.x(), tgt_c.y());
 }
 
 void
-ImageCropTarget::map_target(FrameData &data) {
+ImageCropTarget::map_target(std::pair<cv::Mat, cv::Mat> &rgbd) {
   // rectify images
   if (!camera_model.distortionCoeffs().empty()) {
-    camera_model.rectifyImage(data.rgb, data.rgb);
-    camera_model.rectifyImage(data.depth, data.depth);
+    camera_model.rectifyImage(rgbd.first, rgbd.first);
+    camera_model.rectifyImage(rgbd.second, rgbd.second);
   }
 
   // crop and scale to target dimension
   if (!crop_roi.empty()) {
-    cv::resize(data.rgb(crop_roi), data.rgb, this->target_dimensions, 0, 0, cv::INTER_LINEAR);
-    cv::resize(data.depth(crop_roi), data.depth, this->target_dimensions, 0, 0, cv::INTER_NEAREST);
+    cv::resize(rgbd.first(crop_roi), rgbd.first, this->target_dimensions, 0, 0, cv::INTER_LINEAR);
+    cv::resize(rgbd.second(crop_roi), rgbd.second, this->target_dimensions, 0, 0, cv::INTER_NEAREST);
   }
 }

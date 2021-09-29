@@ -7,10 +7,10 @@
 #include <sensor_msgs/CompressedImage.h>
 #include "ros_common.hpp"
 #include <tf2/buffer_core.h>
-#include <Utils/GroundTruthOdometryInterface.hpp>
+//#include <Utils/GroundTruthOdometryInterface.hpp>
 #include <Eigen/Geometry>
 
-class RosBagReader : public LogReader, public GroundTruthOdometryInterface {
+class RosBagReader : public LogReader/*, public GroundTruthOdometryInterface*/ {
 public:
   RosBagReader(const std::string bagfile_path,
                const std::string topic_colour,
