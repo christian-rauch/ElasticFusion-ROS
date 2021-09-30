@@ -22,8 +22,13 @@ RosNodeReader::RosNodeReader(const uint32_t synchroniser_queue_size,
   sync->connectInput(sub_colour, sub_depth);
   sync->registerCallback(&RosNodeReader::on_rgbd, this);
 
-  decompressionBufferImage = new Bytef[Resolution::getInstance().numPixels() * 3];
-  decompressionBufferDepth = new Bytef[Resolution::getInstance().numPixels() * 2];
+//  decompressionBufferImage = new Bytef[Resolution::getInstance().numPixels() * 3]; // 3 x uint8
+//  decompressionBufferDepth = new Bytef[Resolution::getInstance().numPixels() * 2]; // 1 x uint16
+
+  // we already store a copy of rgbd, so we can just re-use its memory
+  // TODO: we only need to do this once and do not release the memory
+//  rgb = (unsigned char *)rgbd.first.data;
+//  depth = (unsigned short *)rgbd.second.data;
 
   // wait for single CameraInfo message to get intrinsics
   std::cout << "waiting for 'sensor_msgs/CameraInfo' message on '" + ros::names::resolve("camera_info") + "'" << std::endl;
@@ -43,6 +48,9 @@ RosNodeReader::RosNodeReader(const uint32_t synchroniser_queue_size,
 
 RosNodeReader::~RosNodeReader() {
   spinner->stop();
+
+//  delete decompressionBufferImage;
+//  delete decompressionBufferDepth;
 }
 
 void RosNodeReader::on_rgbd(const sensor_msgs::Image::ConstPtr& msg_colour, const sensor_msgs::Image::ConstPtr& msg_depth) {
@@ -52,9 +60,9 @@ void RosNodeReader::on_rgbd(const sensor_msgs::Image::ConstPtr& msg_colour, cons
   rgbd.first = cv_bridge::toCvCopy(msg_colour, "rgb8")->image;
 
   rgbd.second = cv_bridge::toCvCopy(msg_depth)->image;
-  if (!rgbd.second.empty() && rgbd.second.type() == CV_16U) {
-    // convert from 16 bit integer millimeter to 32 bit float meter
-    rgbd.second.convertTo(rgbd.second, CV_32F, 1e-3);
+  if (!rgbd.second.empty() && rgbd.second.type() == CV_32F) {
+    // convert from 32 bit float meter to 16 bit integer millimeter
+    rgbd.second.convertTo(rgbd.second, CV_16U, 1e3);
   }
 
   // scale and crop images in place
@@ -72,7 +80,9 @@ void RosNodeReader::on_rgbd(const sensor_msgs::Image::ConstPtr& msg_colour, cons
     frame_gt_root = parent;
   }
 
-  // TODO: set the raw buffers: decompressionBufferImage, decompressionBufferDepth
+  timestamp = int64_t(hdr_colour.stamp.toNSec());
+  rgb = (unsigned char *)rgbd.first.data;
+  depth = (unsigned short *)rgbd.second.data;
 }
 
 void RosNodeReader::getNext() {}
