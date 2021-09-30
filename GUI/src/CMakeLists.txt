@@ -26,6 +26,7 @@ find_package(CUDA REQUIRED)
 find_package(OpenNI2 REQUIRED)
 find_package(efusion REQUIRED)
 find_package(SuiteSparse REQUIRED)
+find_package(JPEG REQUIRED)
 
 if(WIN32)
   find_package(RealSense QUIET)
@@ -90,6 +91,7 @@ target_link_libraries(ElasticFusion
                       ${SUITESPARSE_LIBRARIES}
                       ${BLAS_LIBRARIES}
                       ${LAPACK_LIBRARIES}
+                      JPEG::JPEG
 )
 
 set_property(TARGET ElasticFusion PROPERTY CXX_STANDARD 17)
