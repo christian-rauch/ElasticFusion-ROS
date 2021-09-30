@@ -4,7 +4,7 @@ project(libefusion)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 
-find_package(Pangolin 0.1 REQUIRED)
+find_package(Pangolin 0.7 REQUIRED)
 find_package(CUDA REQUIRED)
 find_package(SuiteSparse REQUIRED)
 
@@ -77,6 +77,8 @@ target_link_libraries(efusion
                       ${SUITESPARSE_LIBRARIES}
 					  ${EXTRA_WINDOWS_LIBS}
 )
+
+set_property(TARGET efusion PROPERTY CXX_STANDARD 17)
 
 target_include_directories(efusion PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>"

@@ -112,15 +112,15 @@ MainController::MainController(int argc, char * argv[])
 
     gui = new GUI(logFile.length() == 0, Parse::get().arg(argc, argv, "-sc", empty) > -1);
 
-    gui->flipColors->Ref().Set(logReader->flipColors);
-    gui->rgbOnly->Ref().Set(false);
-    gui->pyramid->Ref().Set(true);
-    gui->fastOdom->Ref().Set(fastOdom);
-    gui->confidenceThreshold->Ref().Set(confidence);
-    gui->depthCutoff->Ref().Set(depth);
-    gui->icpWeight->Ref().Set(icp);
-    gui->so3->Ref().Set(so3);
-    gui->frameToFrameRGB->Ref().Set(frameToFrameRGB);
+    gui->flipColors->Ref()->Set(logReader->flipColors);
+    gui->rgbOnly->Ref()->Set(false);
+    gui->pyramid->Ref()->Set(true);
+    gui->fastOdom->Ref()->Set(fastOdom);
+    gui->confidenceThreshold->Ref()->Set(confidence);
+    gui->depthCutoff->Ref()->Set(depth);
+    gui->icpWeight->Ref()->Set(icp);
+    gui->so3->Ref()->Set(so3);
+    gui->frameToFrameRGB->Ref()->Set(frameToFrameRGB);
 
     resizeStream = new Resize(Resolution::getInstance().width(),
                               Resolution::getInstance().height(),
@@ -332,11 +332,11 @@ void MainController::run()
 
         std::stringstream stri;
         stri << eFusion->getModelToModel().lastICPCount;
-        gui->trackInliers->Ref().Set(stri.str());
+        gui->trackInliers->Ref()->Set(stri.str());
 
         std::stringstream stre;
         stre << (std::isnan(eFusion->getModelToModel().lastICPError) ? 0 : eFusion->getModelToModel().lastICPError);
-        gui->trackRes->Ref().Set(stre.str());
+        gui->trackRes->Ref()->Set(stre.str());
 
         if(!gui->pause->Get())
         {

@@ -21,7 +21,7 @@ endif()
 find_package(LAPACK REQUIRED)
 find_package(BLAS REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(Pangolin 0.1 REQUIRED)
+find_package(Pangolin 0.7 REQUIRED)
 find_package(CUDA REQUIRED)
 find_package(OpenNI2 REQUIRED)
 find_package(efusion REQUIRED)
@@ -92,6 +92,7 @@ target_link_libraries(ElasticFusion
                       ${LAPACK_LIBRARIES}
 )
 
+set_property(TARGET ElasticFusion PROPERTY CXX_STANDARD 17)
 
 INSTALL(TARGETS ElasticFusion
         RUNTIME DESTINATION bin
